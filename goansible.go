@@ -163,9 +163,9 @@ func configForAnsible() {
 func main() {
 	setTempDir()
 	if runtime.GOOS == "windows" {
-		// installChoco()
-		// installDotNet()
-		// installPS5()
+		installChoco()
+		installDotNet()
+		installPS5()
 		configForAnsible()
 		fmt.Println("Press enter to exit")
 	} else {
