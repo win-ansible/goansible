@@ -7,10 +7,27 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"regexp"
 	"runtime"
 	"strconv"
 	"strings"
 )
+
+var envRegex = regexp.MustCompile(`%[^%]+%`)
+var choco = "C:/ProgramData/chocolatey/bin/choco.exe"
+
+func CheckError(err error) {
+	if err != nil {
+		// fmt.Println("Error: ", err)
+		fmt.Fprintf(os.Stderr, "Error: : %s", err)
+	}
+}
+
+func CheckErrorFatal(err error) {
+	if err != nil {
+		panic(fmt.Sprintf("Error: ", err))
+	}
+}
 
 func downloadFile(filepath string, url string) (err error) {
 
@@ -52,15 +69,13 @@ func setTempDir() {
 func installChoco() {
 	// check if choco is already installed
 	fmt.Println("Checking if choco is installed")
-	_, err := exec.Command("choco", "search", "dotnet4.6").Output()
+	_, err := exec.Command(choco, "search", "dotnet4.6").Output()
 	if err != nil {
+		fmt.Println("Choco not found:", err)
 		fmt.Println("Installing choco...")
-		out, err := exec.Command("powershell", "iex ((new-object net.webclient).DownloadString('https://chocolatey.org/install.ps1'))").Output()
+		_, err := exec.Command("powershell", "iex ((new-object net.webclient).DownloadString('https://chocolatey.org/install.ps1'))").Output()
 		if err != nil {
 			fmt.Println("Error installing choco: ", err)
-		} else {
-			fmt.Println(string(out))
-			fmt.Println("Choco successfully installed")
 		}
 	} else {
 		fmt.Println("Choco is already installed")
@@ -70,7 +85,7 @@ func installChoco() {
 func installDotNet() {
 	fmt.Println("Checking if dotnet4.6 is installed")
 	fmt.Println("Installing or upgrading dotnet4.6...")
-	out, err := exec.Command("choco", "upgrade", "-y", "dotnet4.6").Output()
+	out, err := exec.Command(choco, "upgrade", "-y", "dotnet4.6").Output()
 	fmt.Println(string(out))
 	if err != nil {
 		fmt.Println("error: ", err)
@@ -108,7 +123,7 @@ func installPS5() {
 
 func removeFileIfExist(path string) {
 	if _, err := os.Stat(path); err == nil {
-		fmt.Printf("Removing %s...\n", path)
+		fmt.Printf("Removing %s... ", path)
 		if err := os.Remove(path); err != nil {
 			fmt.Println("Failed")
 		} else {
@@ -153,6 +168,7 @@ func configForAnsible() {
 		// out, err := exec.Command("cmd", "/c powershell -ExecutionPolicy Bypass -File "+path).Output()
 		if err != nil {
 			fmt.Println("Failed to preparing host for ansible: ", err)
+			fmt.Println("Stdout: ", string(out))
 		} else {
 			fmt.Println(string(out))
 		}
@@ -163,10 +179,10 @@ func configForAnsible() {
 func main() {
 	setTempDir()
 	if runtime.GOOS == "windows" {
-		installChoco()
-		installDotNet()
-		installPS5()
+		// installDotNet()
 		configForAnsible()
+		installChoco()
+		installPS5()
 		fmt.Println("Press enter to exit")
 	} else {
 		fmt.Println("Run this on windows")
@@ -177,5 +193,6 @@ func main() {
 }
 
 //go:generate go get -u github.com/akavel/rsrc
-//go:generate src -manifest=rsrc.xml -o="rsrc.syso"
+//go:generate rsrc -manifest=rsrc.xml -o="rsrc.syso"
+//go:generate wget -c https://raw.githubusercontent.com/ansible/ansible/devel/examples/scripts/ConfigureRemotingForAnsible.ps1
 //go:generate go-bindata ConfigureRemotingForAnsible.ps1
