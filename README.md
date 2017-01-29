@@ -2,23 +2,34 @@
 
 Tools for initial ansible windows setup. Current goal is to support windows7+ OSes. Inspired by [these ps scripts](https://github.com/ansible/ansible/blob/devel/examples/scripts/).
 
-Currently implemented:
-- installation of [chocolatey](https://chocolatey.org/) from the internet
-- ~~installation of Microsoft .NET Framework 4.6 (4.5 or higher is required by WMF 5.0) using chocolatey~~
-- installation of [WMF 5.0](https://www.microsoft.com/en-us/download/details.aspx?id=48729) with Win7AndW2K8R2-KB3066439-x64.msu downloaded from the internet, will reboot after installation
-- execution of `ConfigureRemotingForAnsible.ps1` downloaded from [ansible repo](https://github.com/ansible/ansible/blob/devel/examples/scripts/ConfigureRemotingForAnsible.ps1) and embedded into binary with `go genearte`.
+Use with casion, checkout workflow and code first! Windows setup code is mostly stackoverflow-driven-developed.
 
+##### workflow
 
-##### Build
+- copy self to `%TEMP%`
+- create `startGoansible.cmd` at `shell:startup` path pointing to bynary path from previous step. That's done to simplify execution when system is rebooted by installers
+- install [chocolatey](https://chocolatey.org/)
+- install .Net 4.6 with choco. If reboot is required after installation it's marked for later execution as further installation might also require it
+- install PS5 – this version includes WMIC, actual link is retrieved from https://www.microsoft.com/en-us/download/confirmation.aspx?id=50395. [Choco](https://chocolatey.org/packages/PowerShell) package was broken when this code was implemented
+- change all public networks type to private – RMI won't start if there're public ones and next step will fail
+- reboot if still required, manual logon required after it
+- execute `ConfigureRemotingForAnsible.ps1` downloaded from [ansible repo](https://github.com/ansible/ansible/blob/devel/examples/scripts/ConfigureRemotingForAnsible.ps1) and embedded into binary with `go genearte`.
+- mark binary created on first step for removal on reboot
+- remove `startGoansible.cmd`
+
+##### build
 
 ```bash
 mkdir -vp ~/$GOPATH/bin/win/
 go get -u github.com/jteeuwen/go-bindata/...
 go generate
 go get
-GOARCH=386 GOOS=windows go build -o ~/$GOPATH/bin/win/goansible.exe
+GOARCH=386 GOOS=windows go build -o $GOPATH/bin/win/goansible.exe
 ```
 
-#### Tested on
+#### tested on
 
-- [x] Windows 10
+- [] Windows 7 x32
+- [x] Windows 7 x64
+- [] Windows 10 x32
+- [x] Windows 10 x64

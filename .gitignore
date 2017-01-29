@@ -1,3 +1,4 @@
 rsrc.syso
 bindata.go
 ConfigureRemotingForAnsible.ps1
+dotNetVersion.exe
