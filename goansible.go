@@ -416,7 +416,7 @@ func addToStartup() {
 	file, err := os.Create(startupPath + "\\startGoansible.cmd")
 	CheckErrorFatal(err)
 	defer file.Close()
-	_, err = file.Write([]byte("start \"\" " + tempdir + exe))
+	_, err = file.Write([]byte("start \"\" \"" + tempdir + exe + "\""))
 	CheckErrorFatal(err)
 	file.Sync()
 }
