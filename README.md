@@ -29,7 +29,7 @@ GOARCH=386 GOOS=windows go build -o $GOPATH/bin/win/goansible.exe
 
 #### tested on
 
-- [] Windows 7 x32
+- [ ] Windows 7 x32
 - [x] Windows 7 x64
-- [] Windows 10 x32
+- [ ] Windows 10 x32
 - [x] Windows 10 x64
