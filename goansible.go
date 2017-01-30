@@ -82,16 +82,8 @@ func installChoco() {
 	_, err := exec.Command(choco, "search", "dotnet4.6").Output()
 	if err != nil {
 		fmt.Println("Choco not found:", err)
-		fmt.Println("Setting powershell execution policy to 'Bypass'")
-		cmd := exec.Command("powershell", "Set-ExecutionPolicy", "Bypass")
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
-		err := cmd.Start()
-		CheckErrorFatal(err)
-		err = cmd.Wait()
-		CheckErrorFatal(err)
 		fmt.Println("Installing choco...")
-		cmd = exec.Command("powershell", "iex ((new-object net.webclient).DownloadString('https://chocolatey.org/install.ps1'))")
+		cmd := exec.Command("powershell", "iex ((new-object net.webclient).DownloadString('https://chocolatey.org/install.ps1'))")
 		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
 		err = cmd.Start()
@@ -172,30 +164,15 @@ func extractFile(f string, path string) (err error) {
 }
 
 func configForAnsible() {
-	f := "ConfigureRemotingForAnsible.ps1"
-	path := tempdir + f
-	extractFile(f, path)
-
-	fmt.Println("Setting powershell execution policy to 'Bypass'")
-	cmd := exec.Command("powershell", "Set-ExecutionPolicy", "Bypass")
+	fmt.Println("Preparing host for ansible...")
+	changeTypeForPublicNetworks()
+	cmd := exec.Command("powershell", "iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/ansible/ansible/devel/examples/scripts/ConfigureRemotingForAnsible.ps1'))")
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	err := cmd.Start()
 	CheckErrorFatal(err)
 	err = cmd.Wait()
 	CheckErrorFatal(err)
-
-	fmt.Println("Preparing host for ansible...")
-	changeTypeForPublicNetworks()
-	cmd = exec.Command("powershell", "-ExecutionPolicy", "Bypass", "-File", path)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	err = cmd.Start()
-	CheckErrorFatal(err)
-	err = cmd.Wait()
-	CheckErrorFatal(err)
-
-	removeFileIfExist(path)
 }
 
 func getWindowsStartupPath() string {
@@ -275,21 +252,14 @@ func changeTypeForPublicNetworks() {
 	path := tempdir + f
 	extractFile(f, path)
 
-	fmt.Println("Setting powershell execution policy to 'Bypass'")
-	out, err := exec.Command("powershell", "Set-ExecutionPolicy", "Bypass").Output()
-	if err != nil {
-		fmt.Println("Cannot set powershell execution policy to 'Bypass': ", err)
-	} else {
-		fmt.Println(string(out))
-		fmt.Println("Checking for public networks, they will prevent wmic from starting")
-		out, err := exec.Command("powershell", "-ExecutionPolicy", "Bypass", "-File", path).Output()
-		if err != nil {
-			fmt.Println("Stdout: ", string(out))
-			CheckErrorFatal(err)
-		} else {
-			fmt.Println(string(out))
-		}
-	}
+	fmt.Println("Checking for public networks, they will prevent wmic from starting")
+	cmd := exec.Command("powershell", "-ExecutionPolicy", "Bypass", "-File", path)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	err := cmd.Start()
+	err = cmd.Wait()
+	CheckErrorFatal(err)
+
 	removeFileIfExist(path)
 }
 
@@ -318,10 +288,22 @@ func shutdown() {
 	ExitWindowsEx(EWX_SHUTDOWN, 0)
 }
 
+func setPSPolicyBypass() {
+	fmt.Println("Setting powershell execution policy to 'Bypass'")
+	cmd := exec.Command("powershell", "Set-ExecutionPolicy", "Bypass")
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	err := cmd.Start()
+	CheckErrorFatal(err)
+	err = cmd.Wait()
+	CheckErrorFatal(err)
+}
+
 func main() {
 	setTempDir()
 	if runtime.GOOS == "windows" {
 		addToStartup()
+		setPSPolicyBypass()
 		installChoco()
 		ChocoInstall("dotnet" + dotNetVersion)
 		ChocoInstall("powershell")
@@ -340,5 +322,4 @@ func main() {
 
 //go:generate go get -u github.com/akavel/rsrc
 //go:generate rsrc -manifest=rsrc.xml -o=rsrc.syso
-//go:generate wget -O ConfigureRemotingForAnsible.ps1 https://raw.githubusercontent.com/ansible/ansible/devel/examples/scripts/ConfigureRemotingForAnsible.ps1
-//go:generate go-bindata ConfigureRemotingForAnsible.ps1 ChangeCategory.ps1
+//go:generate go-bindata ChangeCategory.ps1

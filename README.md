@@ -13,7 +13,7 @@ Use with casion, checkout workflow and code first! Windows setup code is mostly 
 - install [PS5](https://chocolatey.org/packages/PowerShell) with choco. If reboot is required after installation it's marked for later execution as further installation might also require it
 - change all public networks type to private – WinRM won't start if there're public ones and next step will fail
 - reboot if still required, manual logon required after it
-- execute `ConfigureRemotingForAnsible.ps1` downloaded from [ansible repo](https://github.com/ansible/ansible/blob/devel/examples/scripts/ConfigureRemotingForAnsible.ps1) and embedded into binary with `go genearte`.
+- execute `ConfigureRemotingForAnsible.ps1` downloaded from [ansible repo](https://github.com/ansible/ansible/blob/devel/examples/scripts/ConfigureRemotingForAnsible.ps1)
 - mark binary created on first step for removal on reboot
 - remove `startGoansible.cmd`
 
