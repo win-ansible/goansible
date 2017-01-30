@@ -1,3 +1,0 @@
-[submodule "dotNetVersion"]
-	path = dotNetVersion
-	url = https://github.com/win-ansible/dotNetVersion.git

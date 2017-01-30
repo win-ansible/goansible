@@ -10,7 +10,7 @@ Use with casion, checkout workflow and code first! Windows setup code is mostly 
 - create `startGoansible.cmd` at `shell:startup` path pointing to bynary path from previous step. That's done to simplify execution when system is rebooted by installers
 - install [chocolatey](https://chocolatey.org/)
 - install .Net 4.6 with choco. If reboot is required after installation it's marked for later execution as further installation might also require it
-- install PS5 – this version includes WMIC, actual link is retrieved from https://www.microsoft.com/en-us/download/confirmation.aspx?id=50395. [Choco](https://chocolatey.org/packages/PowerShell) package was broken when this code was implemented
+- install [PS5](https://chocolatey.org/packages/PowerShell) with choco. If reboot is required after installation it's marked for later execution as further installation might also require it
 - change all public networks type to private – RMI won't start if there're public ones and next step will fail
 - reboot if still required, manual logon required after it
 - execute `ConfigureRemotingForAnsible.ps1` downloaded from [ansible repo](https://github.com/ansible/ansible/blob/devel/examples/scripts/ConfigureRemotingForAnsible.ps1) and embedded into binary with `go genearte`.
