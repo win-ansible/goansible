@@ -152,8 +152,9 @@ func getWindowsStartupPath() string {
 	fmt.Println("Getting windows startup path:")
 	// out, err := exec.Command("powershell", "-ExecutionPolicy", "Bypass", "-NoLogo", "-NonInteractive", "-NoProfile", "-Command", "[environment]::getfolderpath('Startup')").Output()
 	out, err := exec.Command("powershell", "-Command", "[environment]::getfolderpath('Startup')").Output()
-	startupPath := strings.TrimSpace(string(out))
-	fmt.Println(startupPath)
+	newlineRe := regexp.MustCompile(`\r?\n`)
+	startupPath := strings.TrimSpace(newlineRe.ReplaceAllString(string(out), ""))
+	fmt.Printf("'%s'\n", startupPath)
 	CheckErrorFatal(err)
 	return startupPath
 }
@@ -176,7 +177,7 @@ func addToStartup() {
 	} else {
 		fmt.Println("Already started %%TEMP%% startup")
 	}
-	fmt.Println("Adding cmd to startup path")
+	fmt.Printf("Adding cmd to startup path: '%s'\n", startupPath+"\\startGoansible.cmd")
 	// err := ioutil.WriteFile(", ), 0644)
 
 	file, err := os.Create(startupPath + "\\startGoansible.cmd")
