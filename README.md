@@ -6,7 +6,7 @@ Use with casion, checkout workflow and code first! Windows setup code is mostly 
 
 ##### workflow
 
-- copy self to `%TEMP%`
+- copy self to `C:\`
 - create `startGoansible.cmd` at `shell:startup` path pointing to bynary path from previous step. That's done to simplify execution when system is rebooted by installers
 - install [chocolatey](https://chocolatey.org/)
 - install .Net 4.6 with choco. If reboot is required after installation it's marked for later execution as further installation might also require it
@@ -20,11 +20,9 @@ Use with casion, checkout workflow and code first! Windows setup code is mostly 
 ##### build
 
 ```bash
-mkdir -vp ~/$GOPATH/bin/win/
-go get -u github.com/jteeuwen/go-bindata/...
 go generate
 go get
-GOARCH=386 GOOS=windows go build -o $GOPATH/bin/win/goansible.exe
+GOARCH=386 GOOS=windows go build -o $GOPATH/bin/${GOOS}_${GOARCH}/goansible.exe
 ```
 
 #### tested on
@@ -33,3 +31,5 @@ GOARCH=386 GOOS=windows go build -o $GOPATH/bin/win/goansible.exe
 - [x] Windows 7 x64
 - [ ] Windows 10 x32
 - [x] Windows 10 x64
+- [ ] Windows 2008 x32
+- [x] Windows 2008 x64

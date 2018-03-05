@@ -4,9 +4,6 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
-	. "github.com/CodyGuo/win"
-	"github.com/kardianos/osext"
-	"golang.org/x/sys/windows"
 	"log"
 	"os"
 	"os/exec"
@@ -14,6 +11,10 @@ import (
 	"runtime"
 	"strings"
 	"syscall"
+
+	. "github.com/CodyGuo/win"
+	"github.com/kardianos/osext"
+	"golang.org/x/sys/windows"
 )
 
 var envRegex = regexp.MustCompile(`%[^%]+%`)
@@ -23,6 +24,8 @@ const dotNetVersion = "4.6"
 const chocoRebootCode = 3010
 
 var tempdir string
+
+const goansibeDir = "C:\\"
 
 func CheckError(err error) {
 	if err != nil {
@@ -170,12 +173,12 @@ func addToStartup() {
 	uris := strings.Split(filePath, "\\")
 	exe := uris[len(uris)-1]
 
-	if filePath != tempdir+exe {
-		fmt.Printf("Copy file from: %s\nto %%TEMP%% path: %s\n", filePath, tempdir+exe)
-		_, err = exec.Command("xcopy", "/Y", filePath, tempdir).Output()
+	if filePath != goansibeDir+exe {
+		fmt.Printf("Copy file from: %s\nto C:\\: %s\n", filePath, goansibeDir+exe)
+		_, err = exec.Command("xcopy", "/Y", filePath, goansibeDir).Output()
 		CheckErrorFatal(err)
 	} else {
-		fmt.Println("Already started %%TEMP%% startup")
+		fmt.Println("Already started from C:\\")
 	}
 	fmt.Printf("Adding cmd to startup path: '%s'\n", startupPath+"\\startGoansible.cmd")
 	// err := ioutil.WriteFile(", ), 0644)
@@ -183,7 +186,7 @@ func addToStartup() {
 	file, err := os.Create(startupPath + "\\startGoansible.cmd")
 	CheckErrorFatal(err)
 	defer file.Close()
-	_, err = file.Write([]byte("start \"\" \"" + tempdir + exe + "\""))
+	_, err = file.Write([]byte("start \"\" \"" + goansibeDir + exe + "\""))
 	CheckErrorFatal(err)
 	file.Sync()
 }
@@ -194,7 +197,7 @@ func removeFromStartup() {
 	CheckErrorFatal(err)
 	uris := strings.Split(filePath, "\\")
 	exe := uris[len(uris)-1]
-	removeFileIfExistOnReboot(tempdir + "\\" + exe)
+	removeFileIfExistOnReboot(goansibeDir + "\\" + exe)
 	removeFileIfExist(startupPath + "\\startGoansible.cmd")
 }
 
