@@ -227,13 +227,14 @@ func rebootIfRequired() {
 func changeTypeForPublicNetworks() {
 	f := "ChangeCategory.ps1"
 	path := tempdir + f
-	extractFile(f, path)
+	err := extractFile(f, path)
+	CheckErrorFatal(err)
 
 	fmt.Println("Checking for public networks, they will prevent wmic from starting")
 	cmd := exec.Command("powershell", "-ExecutionPolicy", "Bypass", "-File", path)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
-	err := cmd.Start()
+	err = cmd.Start()
 	err = cmd.Wait()
 	CheckErrorFatal(err)
 
